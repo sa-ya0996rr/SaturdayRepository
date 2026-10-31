@@ -1,15 +1,15 @@
 #include "Collision.h"
 
 bool Collision::IsHitRect(
-	float x1,
-	float y1,
-	float width1,
-	float height1,
+	float left1,
+	float top1,
+	float right1,
+	float bottom1,
 
-	float x2,
-	float y2,
-	float width2,
-	float height2)
+	float left2,
+	float top2,
+	float right2,
+	float bottom2)
 {
 	return
 		left1 < right2 &&

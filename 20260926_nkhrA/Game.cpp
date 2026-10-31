@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Config.h"
 #include "DxLib.h"
 
 Game::Game()
@@ -12,28 +13,27 @@ Game::~Game()
 	DxLib_End();
 }
 
-// 
+// ==========================
 // 初期化
-// 
-
+// ==========================
 bool Game::Init()
 {
 	ChangeWindowMode(TRUE);
 
 	SetGraphMode(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, Config::COLOR_BIT);
-	
+
 	if (DxLib_Init() == -1)
 	{
 		return false;
 	}
-	
-	// Playerの初期化
+
+	// プレイヤーの初期化
 	if (!player.Init())
 	{
 		return false;
 	}
 
-	// Mapの初期化
+	// マップの初期化
 	if (!map.Init())
 	{
 		return false;
@@ -45,19 +45,26 @@ bool Game::Init()
 	return true;
 }
 
-// 
+// ==========================
 // ゲームループ
-// 
-void Gmae::Run()
+// ==========================
+void Game::Run()
 {
-	while (ProcessMessage() == 0 && !CheckHitKey(KEY_INPUT_ESCAPE)==0)
+	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
 		// デルタタイム
 		nowCount = GetNowCount();
+
 		float deltaTime = (nowCount - prevCount) / 1000.0f;
 
-		// プレイヤーの更新
-		player.Update(deltaTime);
+		// フレーム
+		if (deltaTime > 0.05f)
+		{
+			deltaTime = 0.05f;
+		}
+
+		// 更新
+		Update(deltaTime);
 
 		// 描画
 		ClearDrawScreen();
@@ -67,18 +74,18 @@ void Gmae::Run()
 	}
 }
 
-// 
+// ==========================
 // 更新
-//
+//==========================
 void Game::Update(float deltaTime)
 {
 	// プレイヤーの更新
-	player.Update(deltaTime);
+	player.Update(deltaTime, map);
 }
 
-// 
+// ==========================
 // 描画
-// 
+// ==========================
 void Game::Draw()
 {
 	// マップの描画

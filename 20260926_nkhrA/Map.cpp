@@ -1,28 +1,28 @@
 #include "Map.h"
-#include "Config.h"
+#include "Collision.h"
 #include "DxLib.h"
 
-// 
+// ==========================
 // コンストラクタ
-// 
+// ==========================
 Map::Map()
 {
 	// マップチップの初期化
-	for (int i = 0; i < Config::MAP_IMG_X_NUM*Config::MAP_IMG_Y_NUM; i++)
+	for (int i = 0; i < Config::MAP_IMG_X_NUM * Config::MAP_IMG_Y_NUM; i++)
 	{
-			mapChipImg[i] = 1;
+		mapChipImg[i] = -1;
 	}
 }
 
-// 
-// デルタタイム
-// 
+// ==========================
+// デストラクタ
+// ==========================
 Map::~Map()
 {
 	// マップチップ画像の解放
 	for (int i = 0; i < Config::MAP_IMG_X_NUM * Config::MAP_IMG_Y_NUM; i++)
 	{
-		if (mapChipImg[i] != 1)
+		if (mapChipImg[i] != -1)
 		{
 			DeleteGraph(mapChipImg[i]);
 
@@ -31,44 +31,44 @@ Map::~Map()
 	}
 }
 
-// 
+// ==========================
 // 初期化
-// 
+// ==========================
 bool Map::Init()
 {
 	int result = LoadDivGraph(
 		Config::MAP_IMG_PATH,
 		Config::MAP_IMG_X_NUM * Config::MAP_IMG_Y_NUM,
-		Config::MAP_IMG_X_NUM,Config::MAP_IMG_Y_NUM,
-		Config::MAP_CHIP_SIZE,Config::MAP_CHIP_SIZE,
+		Config::MAP_IMG_X_NUM, Config::MAP_IMG_Y_NUM,
+		Config::MAP_CHIP_SIZE, Config::MAP_CHIP_SIZE,
 		mapChipImg);
 	return result == 0;
 }
 
-// 
+// ==========================
 // 描画
-// 
+// ==========================
 void Map::Draw()
 {
 	for (int y = 0; y < Config::MAP_Y_NUM; y++)
 	{
 		for (int x = 0; x < Config::MAP_X_NUM; x++)
 		{
-			int imgIndex= map[y][x];
-			int imgHnndle = mapChipImg[imgIndex];
-				DrawGraph(
-					x * Config::MAP_CHIP_SIZE,
-					y * Config::MAP_CHIP_SIZE,
-					imgIndex,	],
-					true);
+			int imgIndex = map[y][x];
+			int imgHandle = mapChipImg[imgIndex];
+			DrawGraph(
+				x * Config::MAP_CHIP_SIZE,
+				y * Config::MAP_CHIP_SIZE,
+				imgHandle,
+				TRUE);
 		}
 	}
 }
 
-// 
+// ==========================
 // X方向の衝突処理
-//
-bool Map::ResolveHorizontalCollision(float x, float y, float width, float height, float moveX,)const
+// ==========================
+bool Map::ResolveHorizontalCollision(float& x, float y,float width, float height,float moveX) const
 {
 	bool hit = false;
 
@@ -96,9 +96,11 @@ bool Map::ResolveHorizontalCollision(float x, float y, float width, float height
 			float blockBottom = blockY + Config::MAP_CHIP_SIZE;
 
 			// 衝突判定
-			if (Collision::IsHitRect(
-				x, y, width, height,
-				blockX, blockY, blockRight, blockBottom))
+			if (!Collision::IsHitRect(
+				x, y,
+				x + width, y + height,
+				blockX, blockY,
+				blockRight, blockBottom))
 			{
 				continue;
 			}
@@ -119,10 +121,10 @@ bool Map::ResolveHorizontalCollision(float x, float y, float width, float height
 	return hit;
 }
 
-// 
+// ==========================
 // Y方向の衝突処理
-// 
-bool Map::ResolveVerticalCollision(float x, float y, float width, float height, float moveY) const
+// ==========================
+bool Map::ResolveVerticalCollision(float x, float& y,float width, float height,float moveY) const
 {
 	bool hit = false;
 	// 移動していない場合は判定しない
@@ -168,12 +170,12 @@ bool Map::ResolveVerticalCollision(float x, float y, float width, float height, 
 	return hit;
 }
 
-// 
+// ==========================
 // ブロック種類取得
-//
+// ==========================
 unsigned char Map::GetBlockType(int x, int y) const
 {
-	if(x<0||y<0||x>=Config::MAP_X_NUM||y>=Config::MAP_Y_NUM)
+	if (x < 0 || y < 0 || x >= Config::MAP_X_NUM || y >= Config::MAP_Y_NUM)
 	{
 		return 0;
 	}

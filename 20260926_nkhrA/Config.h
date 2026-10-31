@@ -2,43 +2,43 @@
 namespace Config
 {
 	// ==========================
-	// Window
+	// ウィンドウ
 	// ==========================
 	constexpr int WINDOW_WIDTH = 1440;	// ウィンドウ幅
 	constexpr int WINDOW_HEIGHT = 900;	// ウィンドウ高さ
 	constexpr int COLOR_BIT = 16;		// 色深度
 
 	// ==========================
-	// MAP
-	//==========================
+	// マップ
+	// ==========================
 	constexpr int MAP_CHIP_SIZE = 64;	// マップチップのサイズ
 
 	constexpr int MAP_X_NUM = 16;	// マップの横方向のチップ数
 	constexpr int MAP_Y_NUM = 12;	// マップの縦方向のチップ数
 
-	// Map image
+	// マップ画像
 	constexpr int MAP_IMG_X_NUM = 2;	// マップ画像の横方向のチップ数
 	constexpr int MAP_IMG_Y_NUM = 1;	// マップ画像の縦方向のチップ数
 
 	constexpr const char* MAP_IMG_PATH = "img/map.png";	// マップ画像のパス
 
 	// ==========================
-	// Player
+	// プレイヤー
 	// ==========================
 	constexpr float PLAYER_START_X = 100.0f;	// プレイヤーの初期X座標
 	constexpr float PLAYER_START_Y = 100.0f;	// プレイヤーの初期Y座標
 	constexpr float PLAYER_MOVE_SPEED = 200.0f;	// プレイヤーの移動速度
 
-	// Player image size
+	// プレイヤー画像サイズ
 	constexpr int PLAYER_IMG_SIZE_X = 64;	// プレイヤー画像の横幅
 	constexpr int PLAYER_IMG_SIZE_Y = 96;	// プレイヤー画像の縦幅
 
-	// Player hitbox size
+	// プレイヤー当たり判定サイズ
 	constexpr int PLAYER_HIT_SIZE_X = 40;	// プレイヤーの当たり判定の横幅
 	constexpr int PLAYER_HIT_SIZE_Y = 60;	// プレイヤーの当たり判定の縦幅
 
 	// ==========================
-	// Animation
+	// アニメーション
 	// ==========================
 	constexpr int ANIM_PATTERN_NUM = 4;	// アニメーションのパターン数
 	constexpr int ANIM_TYPE_NUM = 4;	// アニメーションの種類数

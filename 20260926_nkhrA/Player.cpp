@@ -2,9 +2,9 @@
 #include "Map.h"
 #include "DxLib.h"
 
-//
+// ==========================
 // アニメーション方向
-//
+// ==========================
 namespace
 {
 	constexpr int ANIM_DOWN = 0;
@@ -13,9 +13,9 @@ namespace
 	constexpr int ANIM_RIGHT = 3;
 }
 
-// 
+// ==========================
 // コンストラクタ
-//
+// ==========================
 Player::Player()
 {
 	x = 0.0f;
@@ -24,24 +24,31 @@ Player::Player()
 	velocityX = 0.0f;
 	velocityY = 0.0f;
 
+	gravity = 1800.0f;
+	jumpPower = 650.0f;
+
+	onGround = false;
+	jumpKeyPrev = false;
+
 	animTimer = 0.0f;
 
 	animNowType = ANIM_DOWN;
 	animNowPattern = 1;
 	animNowIndex = 1;
-	
+
 	drawOffsetX = 0;
 	drawOffsetY = 0;
 
-	for (int i = 0; i < Config::ANIM_PATTERN_NUM * Config::ANIM_TYPE_NUM; i++);
+
+	for (int i = 0; i < Config::ANIM_PATTERN_NUM * Config::ANIM_TYPE_NUM; i++)
 	{
 		playerImg[i] = -1;
 	}
 }
 
-// 
+// ==========================
 // デストラクタ
-//
+// ==========================
 Player::~Player()
 {
 	// プレイヤー画像の解放
@@ -55,13 +62,12 @@ Player::~Player()
 	}
 }
 
-
-// 
+// ==========================
 // 初期化
-//
+// ==========================
 bool Player::Init()
 {
-	// プレイヤーの初期位置
+	// プレイヤーの初期座標
 	x = Config::PLAYER_START_X;
 	y = Config::PLAYER_START_Y;
 
@@ -89,23 +95,26 @@ bool Player::Init()
 		return false;
 	}
 
-	// 描画オフセットの計算
+	// 描画位置補正
 	drawOffsetX = (Config::PLAYER_IMG_SIZE_X - Config::PLAYER_HIT_SIZE_X) / 2;
 	drawOffsetY = (Config::PLAYER_IMG_SIZE_Y - Config::PLAYER_HIT_SIZE_Y) / 2;
 	return true;
 }
 
-// 
+// ==========================
 // 更新
-//
+// ==========================
 void Player::Update(float deltaTime, const Map& map)
 {
 	// 速度リセット
 	velocityX = 0.0f;
-	velocityY = 0.0f;
+	//velocityY = 0.0f;
 
 	bool isMoving = false;
 
+	// 
+	// キー入力
+	// 
 	if (CheckHitKey(KEY_INPUT_UP) != 0)
 	{
 		velocityY = -Config::PLAYER_MOVE_SPEED;
@@ -131,11 +140,11 @@ void Player::Update(float deltaTime, const Map& map)
 		isMoving = true;
 	}
 
-	// 移動量の計算
+	// 移動量
 	float moveX = velocityX * deltaTime;
 	float moveY = velocityY * deltaTime;
 
-	// X軸方向の衝突処理
+	// X方向の衝突処理
 	x += moveX;
 
 	map.ResolveHorizontalCollision(
@@ -143,15 +152,47 @@ void Player::Update(float deltaTime, const Map& map)
 		Config::PLAYER_HIT_SIZE_X, Config::PLAYER_HIT_SIZE_Y,
 		moveX);
 
-	// Y軸方向の衝突処理
+	// SPACEキーの入力状態
+	bool jumpKey = CheckHitKey(KEY_INPUT_SPACE) != 0;
+
+	// SPACEキーを押した瞬間だけジャンプ
+	if (jumpKey && !jumpKeyPrev && onGround)
+	{
+		velocityY = -jumpPower;
+		onGround = false;
+	}
+
+	// 前回のキー入力状態を保存
+	jumpKeyPrev = jumpKey;
+
+	// 重力
+	velocityY += gravity * deltaTime;
+
+	// Y方向の衝突処理
 	y += moveY;
 
-	map.ResolveVerticalCollision(
+	bool verticalHit = map.ResolveVerticalCollision(
 		x, y,
 		Config::PLAYER_HIT_SIZE_X, Config::PLAYER_HIT_SIZE_Y,
 		moveY);
 
-	// アニメーションの更新
+	// 着地・天井判定
+	if (verticalHit)
+	{
+		velocityY = 0.0f;
+
+		// 下方向に移動して衝突した場合は着地
+		if (moveY > 0.0f)
+		{
+			onGround = true;
+		}
+	}
+	else
+	{
+		onGround = false;
+	}
+
+	// アニメーション
 	if (isMoving)
 	{
 		animTimer += deltaTime;
@@ -160,7 +201,7 @@ void Player::Update(float deltaTime, const Map& map)
 		{
 			animTimer = 0.0f;
 			animNowPattern++;
-			animNowPattern% = Config::ANIM_PATTERN_NUM;
+			animNowPattern %= Config::ANIM_PATTERN_NUM;
 		}
 	}
 	else
@@ -172,9 +213,9 @@ void Player::Update(float deltaTime, const Map& map)
 	animNowIndex = animNowPattern + animNowType * Config::ANIM_PATTERN_NUM;
 }
 
-// 
+// ==========================
 // 描画
-//
+// ==========================
 void Player::Draw() const
 {
 	DrawGraph(
@@ -182,6 +223,7 @@ void Player::Draw() const
 		static_cast<int>(y) - drawOffsetY,
 		playerImg[animNowIndex],
 		true);
+
 	// 当たり判定の描画
 	DrawBox(
 		static_cast<int>(x),
